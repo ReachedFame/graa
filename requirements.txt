@@ -1,0 +1,7 @@
+discord.py
+asyncio
+requests
+dnspython
+gtts
+ipwhois
+discord.py-self

